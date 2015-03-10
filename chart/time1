@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+	</head>
+
+	<body>
+		<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+	</body>
+
+</html>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/highcharts-more.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+<script type="text/javascript">
+	// Define tasks
+	var tasks = [{
+		name: "JS起源",
+		intervals: [{
+			from: Date.UTC(2015, 7, 1, 9, 30, 0),
+			to: Date.UTC(2015, 7, 1, 9, 45, 0)
+		}]
+	}, {
+		name: "JS语法",
+		intervals: [{
+			from: Date.UTC(2015, 7, 1, 9, 45, 0),
+			to: Date.UTC(2015, 7, 1, 10, 15, 0)
+		}, {
+			from: Date.UTC(2015, 7, 1, 10, 30, 0),
+			to: Date.UTC(2015, 7, 1, 11, 0, 0)
+		}]
+	}, {
+		name: "实例",
+		intervals: [{
+			from: Date.UTC(2015, 7, 1, 9, 45, 0),
+			to: Date.UTC(2015, 7, 1, 10, 0, 0)
+		}, {
+			from: Date.UTC(2015, 7, 1, 10, 30, 0),
+			to: Date.UTC(2015, 7, 1, 11, 0, 0)
+		}]
+	}, {
+		name: "CSS",
+		intervals: [ {
+			from: Date.UTC(2015, 7, 1, 10, 15, 0),
+			to: Date.UTC(2015, 7, 1, 10, 30, 0)
+		}]
+	}, {
+		name: "DOM元素",
+		intervals: [ {
+			from: Date.UTC(2015, 7, 1, 10, 0, 0),
+			to: Date.UTC(2015, 7, 1, 10, 15, 0)
+		}]
+	}];
+	// re-structure the tasks into line seriesvar series = [];
+	var series = [];
+	$.each(tasks.reverse(), function(i, task) {
+		var item = {
+			name: task.name,
+			data: []
+		};
+		$.each(task.intervals, function(j, interval) {
+			item.data.push({
+				x: interval.from,
+				y: i,
+				label: interval.label,
+				from: interval.from,
+				to: interval.to
+			}, {
+				x: interval.to,
+				y: i,
+				from: interval.from,
+				to: interval.to
+			});
+			// add a null value between intervals
+			if (task.intervals[j + 1]) {
+				item.data.push(
+					[(interval.to + task.intervals[j + 1].from) / 2, null]
+				);
+			}
+		});
+		series.push(item);
+	});
+	// create the chart
+	var chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'container'
+		},
+		credits: {
+			enabled: false
+		},
+		title: {
+			text: '本次课程时间安排'
+		},
+		xAxis: {
+			type: 'datetime'
+		},
+		yAxis: {
+			tickInterval: 1,
+			labels: {
+				formatter: function() {
+					if (tasks[this.value]) {
+						return tasks[this.value].name;
+					}
+				}
+			},
+			startOnTick: false,
+			endOnTick: false,
+			title: {
+				text: '介绍内容'
+			},
+			minPadding: 0.2,
+			maxPadding: 0.2
+		},
+		legend: {
+			enabled: false
+		},
+		tooltip: {
+			formatter: function() {
+				return '<b>' + tasks[this.y].name + '</b><br/>' +
+					Highcharts.dateFormat('%HH:%MM', this.point.options.from) +
+					' - ' + Highcharts.dateFormat('%HH:%MM', this.point.options.to);
+			}
+		},
+		plotOptions: {
+			line: {
+				lineWidth: 9,
+				//linecap:"square",
+				marker: {
+					enabled: false
+				},
+				dataLabels: {
+					enabled: true,
+					align: 'left',
+					formatter: function() {
+						console.log(this.point.options);
+						return this.point.options && this.point.options.label;
+					}
+				}
+			}
+		},
+		series: series
+	});
+</script>
